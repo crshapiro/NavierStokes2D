@@ -3,7 +3,8 @@
 
 #include <stdio.h>
 #include <vector>
-using namespace std;
+using std::vector;
+using std::invalid_argument;
 
 class TridiagonalMatrix
 {

@@ -120,7 +120,7 @@ double NavierStokes2D::divergence()
 
 double NavierStokes2D::dt_CFL()
 {
-    double dt = 0.4*min(dy, dx);
+    double dt = 0.4*max(dy, dx);
     double U = 0;
     for (size_t i = 1; i <= Nx; i++)
         for (size_t j = 1; j <= Ny; j++)
@@ -318,17 +318,17 @@ inline double NavierStokes2D::vs(size_t i, size_t j)
 void NavierStokes2D::print()
 {
     ofstream fu, fv;
-    fu.open("u_" + to_string(n) + ".out");
-    fv.open("v_" + to_string(n) + ".out");
+    fu.open("u_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
+    fv.open("v_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
     for (size_t j = 1; j <= Ny; j++)
     {
         for (size_t i = 1; i < Nx; i++)
         {
-            fu << u[i][j] << "\t";
-            fv << v[i][j] << "\t";
+            fu.write(reinterpret_cast<const char*>(&u[i][j]), sizeof(double));
+            fv.write(reinterpret_cast<const char*>(&v[i][j]), sizeof(double));
         }
-        fu << u[Nx][j] << endl;
-        fv << v[Nx][j] << endl;
+        fu.write(reinterpret_cast<const char*>(&u[Nx][j]), sizeof(double));
+        fv.write(reinterpret_cast<const char*>(&v[Nx][j]), sizeof(double));
     }
     fu.close();
     fv.close();
@@ -337,20 +337,20 @@ void NavierStokes2D::print()
 void NavierStokes2D::printGrid()
 {
     ofstream fx, fy, fb;
-    fx.open("x.out");
-    fy.open("y.out");
-    fb.open("obj.out");
+    fx.open("x.bin", std::ios::out | std::ios::binary);
+    fy.open("y.bin", std::ios::out | std::ios::binary);
+    fb.open("obj.bin", std::ios::out | std::ios::binary);
     for (size_t j = 1; j <= Ny; j++)
     {
         for (size_t i = 1; i < Nx; i++)
         {
-            fx << x[i][j] << "\t";
-            fy << y[i][j] << "\t";
-            fb << isSolid[i][j] << "\t";
+            fx.write(reinterpret_cast<const char*>(&x[i][j]), sizeof(double));
+            fy.write(reinterpret_cast<const char*>(&y[i][j]), sizeof(double));
+            fb.write(reinterpret_cast<const char*>(&isSolid[i][j]), sizeof(double));
         }
-        fx << x[Nx][j] << endl;
-        fy << y[Nx][j] << endl;
-        fb << isSolid[Nx][j] << endl;
+        fx.write(reinterpret_cast<const char*>(&x[Nx][j]), sizeof(double));
+        fy.write(reinterpret_cast<const char*>(&y[Nx][j]), sizeof(double));
+        fb.write(reinterpret_cast<const char*>(&isSolid[Nx][j]), sizeof(double));
     }
     fx.close();
     fy.close();

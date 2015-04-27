@@ -3,11 +3,18 @@
 
 #include <stdio.h>
 #include <vector>
+#include <iostream>
 #include <stdexcept>
 #include <fstream>
 #include "MultigridController.h"
 #include "Shape2D.h"
-using namespace std;
+using std::vector;
+using std::invalid_argument;
+using std::string;
+using std::to_string;
+using std::ofstream;
+using std::endl;
+using std::cout;
 
 class Multigrid
 {
@@ -30,10 +37,6 @@ public:
     double tol();
     
     void setInternalBoundary(const Shape2D& obj);
-    
-    //void print(string fileName);
-    //void printGrid();
-
     
     double elem(size_t i, size_t j);
     

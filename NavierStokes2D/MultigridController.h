@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <vector>
 #include "math.h"
-using namespace std;
+using std::vector;
 
 class MultigridController
 {

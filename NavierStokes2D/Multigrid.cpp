@@ -85,16 +85,13 @@ Multigrid::Multigrid(double Lx, double Ly, vector<double> ul, vector<double> ut,
         sublevel = nullptr;
     else
         sublevel = new Multigrid(Lx, Ly, vector<double>(Ny/2, 0.0), vector<double>(Nx/2, 0.0), vector<double>(Ny/2, 0.0), vector<double>(Nx/2, 0.0), leftIsDirichlet, topIsDirichlet, rightIsDirichlet, bottomIsDirichlet, nlev, this, MGC);
-
 }
 
 Multigrid::~Multigrid()
 { delete sublevel; }
 
 double Multigrid::elem(size_t i, size_t j)
-{
-    return u[i][j];
-}
+{ return u[i][j]; }
 
 void Multigrid::setInternalBoundary(const Shape2D& obj)
 {
@@ -197,7 +194,6 @@ void Multigrid::iterate()
             controller->reset();
         }
     }
-    //cout << "Hello" << endl;
 }
 
 void Multigrid::subtractMean()
@@ -245,7 +241,6 @@ void Multigrid::smooth()
             b = (b1 - b2)/dx + (b3 - b4)/dy;
             u[i][j] = (R[i][j]/a - b/a)*(1.0 - isSolid[i][j]);
         }
-    
     
     computeResidual();
     n++;

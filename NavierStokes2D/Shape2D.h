@@ -5,7 +5,7 @@
 #include <vector>
 #include <math.h>
 #include <stdexcept>
-using namespace std;
+using std::invalid_argument;
 
 class Shape2D
 {
@@ -29,7 +29,6 @@ protected:
     double s;
 };
 
-
 class Circle : public Shape2D
 {
 public:
@@ -40,6 +39,5 @@ public:
 protected:
     double R;
 };
-
 
 #endif /* defined(__NavierStokes2D__Shape2D__) */

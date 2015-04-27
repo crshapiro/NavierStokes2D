@@ -10,7 +10,13 @@
 #include "Multigrid.h"
 #include "MultigridController.h"
 #include "Shape2D.h"
-using namespace std;
+using std::vector;
+using std::cout;
+using std::endl;
+using std::min;
+using std::max;
+using std::ofstream;
+using std::to_string;
 
 class NavierStokes2D
 {

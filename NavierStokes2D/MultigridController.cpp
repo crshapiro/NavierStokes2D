@@ -1,7 +1,7 @@
 #include "MultigridController.h"
 
 MultigridController::MultigridController(size_t Nx, size_t Ny)
-{ nlev = log2( min(Nx, Ny) ); }
+{ nlev = log2( std::min(Nx, Ny) ); }
 
 MultigridController::~MultigridController()
 { return; }
