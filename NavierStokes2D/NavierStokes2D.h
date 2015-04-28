@@ -27,9 +27,13 @@ public:
 
     void setInternalBoundary(const Shape2D& obj);
 
-    void print();
+    void print(string fileName);
     void displayInfo();
-    void printGrid();
+    void printGrid(string fileName);
+    
+    double get_u(const double& xi, const double& yi);
+    double get_v(const double& xi, const double& yi);
+    double get_p(const double& xi, const double& yi);
     
 private:
     // Velocities
@@ -38,10 +42,15 @@ private:
     
     // Grid
     vector<vector<double>> x, y;
+    
+    // Find nearest index
+    size_t getNearestIndex_i(const double& xi);
+    size_t getNearestIndex_j(const double &yi);
 
     // CFL condition
     inline double uMagnitude(size_t i, size_t j);
-    double dt_CFL();
+    void CFL();
+    double dt;
     
     // Time
     double time;
@@ -95,8 +104,8 @@ private:
     inline size_t yVectorIndex_j(size_t k);
     
     // Approximate Factorization solutions by TDMA
-    void yTDMA(const double dt);
-    void xTDMA(const double dt);
+    void yTDMA();
+    void xTDMA();
     
     // Viscous term
     void Ly(size_t i, size_t j, double& as, double& ap, double& an, double &R, const double dt, const double& un, const double& us);

@@ -20,12 +20,20 @@ NavierStokes2D::NavierStokes2D(vector<double> ul, vector<double> ut, vector<doub
     // Generate coordinate values
     x = vector<vector<double>>(Nx+2, vector<double>(Ny+2));
     y = vector<vector<double>>(Nx+2, vector<double>(Ny+2));
-    for (size_t i = 1; i <= Nx; i++)
+    for (size_t i = 0; i <= Nx + 1; i++)
+    {
+        y[i][0] = 0;
+        y[i][Ny+1] = H;
         for (size_t j = 1; j<= Ny; j++)
-        {
-            x[i][j] = i*dx - dx/2;
             y[i][j] = j*dy - dy/2;
-        }
+    }
+    for (size_t j = 0; j<= Ny+1; j++)
+    {
+        x[0][j] = 0;
+        x[Nx+1][j] = L;
+        for (size_t i = 1; i <= Nx; i++)
+            x[i][j] = i*dx - dx/2;
+    }
     
     // Internal boundary
     isSolid = vector<vector<double>>(Nx+2, vector<double>(Ny+2, 0.0));
@@ -91,11 +99,12 @@ NavierStokes2D::NavierStokes2D(vector<double> ul, vector<double> ut, vector<doub
     
     // Loosen convergence for pressure
     MG.tol(1E-6);
-    MG.maxIter(100*Nx*Ny);
+    MG.maxIter(Nx*Ny);
     
     // Set time and step number
     n = 0;
     time = 0;
+    dt = 0;
     
     return;
 }
@@ -109,6 +118,55 @@ void NavierStokes2D::displayInfo()
     cout << "Total divergence = " << divergence() << endl;
 }
 
+double NavierStokes2D::get_u(const double& xi, const double& yi)
+{
+    size_t i = getNearestIndex_i(xi);
+    size_t j = getNearestIndex_j(yi);
+    double ax = (xi - x[i][j])/dx;
+    double ay = (yi - y[i][j])/dy;
+    double ub = ax*u[i+1][j] + (1-ax)*u[i][j];
+    double ut = ax*u[i+1][j+1] + (1-ax)*u[i][j+1];
+    return ay*ut + (1-ay)*ub;
+}
+
+double NavierStokes2D::get_v(const double& xi, const double& yi)
+{
+    size_t i = getNearestIndex_i(xi);
+    size_t j = getNearestIndex_j(yi);
+    double ax = (xi - x[i][j])/dx;
+    double ay = (yi - y[i][j])/dy;
+    double ub = ax*v[i+1][j] + (1-ax)*v[i][j];
+    double ut = ax*v[i+1][j+1] + (1-ax)*v[i][j+1];
+    return ay*ut + (1-ay)*ub;
+}
+
+double NavierStokes2D::get_p(const double& xi, const double& yi)
+{
+    size_t i = getNearestIndex_i(xi);
+    size_t j = getNearestIndex_j(yi);
+    double ax = (xi - x[i][j])/dx;
+    double ay = (yi - y[i][j])/dy;
+    double ub = ax*MG.elem(i+1,j) + (1-ax)*MG.elem(i,j);
+    double ut = ax*MG.elem(i+1,j+1) + (1-ax)*MG.elem(i,j+1);
+    return ay*ut + (1-ay)*ub;
+}
+
+size_t NavierStokes2D::getNearestIndex_i(const double& xi)
+{
+    for (size_t i = 1; i <= Nx; i++)
+        if (x[i][1] > xi)
+            return i-1;
+    return Nx;
+}
+
+size_t NavierStokes2D::getNearestIndex_j(const double &yi)
+{
+    for (size_t j = 1; j <= Nx; j++)
+        if (y[1][j] > yi)
+            return j-1;
+    return Ny;
+}
+
 double NavierStokes2D::divergence()
 {
     double div = 0;
@@ -118,9 +176,9 @@ double NavierStokes2D::divergence()
     return div;
 }
 
-double NavierStokes2D::dt_CFL()
+void NavierStokes2D::CFL()
 {
-    double dt = 0.4*max(dy, dx);
+    dt = 0.4*max(dy, dx);
     double U = 0;
     for (size_t i = 1; i <= Nx; i++)
         for (size_t j = 1; j <= Ny; j++)
@@ -143,7 +201,7 @@ double NavierStokes2D::dt_CFL()
             U = max(U, uMagnitude(i, Ny));
     }
     
-    return dt/U;
+    dt/U;
 }
 
 inline double NavierStokes2D::uMagnitude(size_t i, size_t j)
@@ -151,8 +209,10 @@ inline double NavierStokes2D::uMagnitude(size_t i, size_t j)
 
 double NavierStokes2D::step()
 {
+    // Set time step
+    CFL();
+    
     // Some Parameters
-    double dt = dt_CFL();
     double dx_inv = 1.0/dx;
     double dy_inv = 1.0/dy;
     
@@ -165,8 +225,8 @@ double NavierStokes2D::step()
         }
     
     // Do approximate factorization TDMA
-    yTDMA(dt);
-    xTDMA(dt);
+    yTDMA();
+    xTDMA();
     
     // Pressure Poisson equation RHS
     vector<vector<double>> R(Nx+2);
@@ -315,49 +375,57 @@ inline double NavierStokes2D::vs(size_t i, size_t j)
     * (1.0 - isSolid[i][j-1]) * (1.0 - isSolid[i][j]);
 }
 
-void NavierStokes2D::print()
+void NavierStokes2D::print(string fileName)
 {
-    ofstream fu, fv;
-    fu.open("u_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
-    fv.open("v_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
-    for (size_t j = 1; j <= Ny; j++)
+    ofstream fu, fv, fp;
+    fu.open(fileName + "u_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
+    fv.open(fileName + "v_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
+    fp.open(fileName + "p_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
+    fu.write(reinterpret_cast<const char*>(&time), sizeof(double));
+    fv.write(reinterpret_cast<const char*>(&time), sizeof(double));
+    fp.write(reinterpret_cast<const char*>(&time), sizeof(double));
+    for (size_t j = 0; j <= Ny+1; j++)
     {
-        for (size_t i = 1; i < Nx; i++)
+        for (size_t i = 0; i <= Nx+1; i++)
         {
             fu.write(reinterpret_cast<const char*>(&u[i][j]), sizeof(double));
             fv.write(reinterpret_cast<const char*>(&v[i][j]), sizeof(double));
+
+            size_t ip(i), jp(j);
+            if (i == 0)             ip = 1;
+            if (i == Nx + 1)        ip = Nx;
+            if (j == 0)             jp = 1;
+            if (j == Ny + 1)        jp = Ny;
+            double p = MG.elem(ip, jp);
+            fp.write(reinterpret_cast<const char*>(&p), sizeof(double));
         }
-        fu.write(reinterpret_cast<const char*>(&u[Nx][j]), sizeof(double));
-        fv.write(reinterpret_cast<const char*>(&v[Nx][j]), sizeof(double));
     }
     fu.close();
     fv.close();
+    fp.close();
 }
 
-void NavierStokes2D::printGrid()
+void NavierStokes2D::printGrid(string fileName)
 {
     ofstream fx, fy, fb;
-    fx.open("x.bin", std::ios::out | std::ios::binary);
-    fy.open("y.bin", std::ios::out | std::ios::binary);
-    fb.open("obj.bin", std::ios::out | std::ios::binary);
-    for (size_t j = 1; j <= Ny; j++)
+    fx.open(fileName + "x.bin", std::ios::out | std::ios::binary);
+    fy.open(fileName + "y.bin", std::ios::out | std::ios::binary);
+    fb.open(fileName + "obj.bin", std::ios::out | std::ios::binary);
+    for (size_t j = 0; j <= Ny+1; j++)
     {
-        for (size_t i = 1; i < Nx; i++)
+        for (size_t i = 0; i <= Nx+1; i++)
         {
             fx.write(reinterpret_cast<const char*>(&x[i][j]), sizeof(double));
             fy.write(reinterpret_cast<const char*>(&y[i][j]), sizeof(double));
             fb.write(reinterpret_cast<const char*>(&isSolid[i][j]), sizeof(double));
         }
-        fx.write(reinterpret_cast<const char*>(&x[Nx][j]), sizeof(double));
-        fy.write(reinterpret_cast<const char*>(&y[Nx][j]), sizeof(double));
-        fb.write(reinterpret_cast<const char*>(&isSolid[Nx][j]), sizeof(double));
     }
     fx.close();
     fy.close();
     fb.close();
 }
 
-void NavierStokes2D::yTDMA(const double dt)
+void NavierStokes2D::yTDMA()
 {
     // Flip ustar and vstar to right hand side with the right indexing
     vector<double> Rx(Nx*Ny), Ry(Nx*Ny);
@@ -430,7 +498,7 @@ void NavierStokes2D::yTDMA(const double dt)
     return;
 }
 
-void NavierStokes2D::xTDMA(const double dt)
+void NavierStokes2D::xTDMA()
 {
     // Flip ustar and vstar to right hand side with the right indexing
     vector<double> Rx(Nx*Ny), Ry(Nx*Ny);

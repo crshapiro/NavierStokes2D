@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <stdexcept>
 using std::vector;
 using std::invalid_argument;
 

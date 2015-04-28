@@ -1,29 +1,74 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
+#include <fstream>
 #include "NavierStokes2D.h"
 #include "Multigrid.h"
 #include "Shape2D.h"
 using namespace std;
 
-int main(int argc, const char * argv[]) {
+void strouhal(NavierStokes2D& NS, double L, double H, double A, double d, double time)
+{
+    ofstream f;
+    f.open("output/strouhal.bin", std::ios::out | std::ios::binary | std::ios::app);
+    f.write(reinterpret_cast<const char*>(&time), sizeof(double));
+    double v = NS.get_v(d+A/2+2*A, H/2);
+    f.write(reinterpret_cast<const char*>(&v), sizeof(double));
+    f.close();
+}
+
+int main(int argc, const char * argv[])
+{
+    // Make output directory if needed
+    system("mkdir output");
+    
     
     // parse input arguments
-    if (argc < 6)
+    if (argc < 8)
     {
-        cout << "Usage is NavierStokes2D Nx Ny Re nsteps shape";
+        cout << "Usage is NavierStokes2D Nx Ny L H Re nStep nDisp nPrint nPrintStart (shape) (d) (A)." << endl;
         cin.get();
         return -1;
     }
     double Nx = stod(argv[1]);
     double Ny = stod(argv[2]);
-    double Re = stod(argv[3]);
-    size_t nsteps = stoi(argv[4]);
-    string shape = argv[5];
+    double L = stod(argv[3]);
+    double H = stod(argv[4]);
+    double Re = stod(argv[5]);
+    size_t nStep = stoi(argv[6]);
+    size_t nDisp = stoi(argv[7]);
+    size_t nPrint = stoi(argv[8]);
+    size_t nPrintStart = stoi(argv[9]);
+
+    string shape("none");
+    double d(L/2), A(1);
+    if (argc > 10)
+    {
+        if (argc < 13)
+        {
+            cout << "Usage is NavierStokes2D Nx Ny L H Re nStep nDisp nPrint nPrintStart (shape) (d) (A)." << endl;
+            cout << "Shape, d, and A must be included together." << endl;
+            cin.get();
+            return -1;
+        }
+        shape = argv[10];
+        d = stod(argv[11]);
+        A = stod(argv[12]);
+    }
     
-    // domain values
-    double H = 8.0;
-    double L = 16.0;
+    // Output input arguments
+    cout << "Nx = " << Nx << endl;
+    cout << "Ny = " << Ny << endl;
+    cout << "L = " << L << endl;
+    cout << "H = " << H << endl;
+    cout << "Re = " << Re << endl;
+    cout << "nStep = " << nStep << endl;
+    cout << "nDisp = " << nDisp << endl;
+    cout << "nPrint = " << nPrint << endl;
+    cout << "nPrintStart = " << nPrintStart << endl;
+    cout << "shape = " << shape << endl;
+    cout << "d = " << d << endl;
+    cout << "A = " << A << endl;
     
     // Allocate boundary conditions
     vector<double> ul(Ny,0.0), ut(Nx,0.0), ur(Ny,0.0), ub(Nx,0.0);
@@ -40,22 +85,39 @@ int main(int argc, const char * argv[]) {
     
     // Construct solver
     NavierStokes2D NS = NavierStokes2D(ul, ut, ur, ub, vl, vt, vr, vb, leftIsDirichlet, topIsDirichlet, rightIsDirichlet, bottomIsDirichlet, H, L, Re, true);
-    if (shape == "square") NS.setInternalBoundary(Square(4, 4, 1));
-    if (shape == "circle") NS.setInternalBoundary(Circle(4, 4, 0.5));
-    NS.printGrid();
-    NS.print();
-    for (size_t n = 1; n <= nsteps; n++)
+    
+    // Apply internal boundary conditions
+    if (shape == "square")
     {
-        NS.step();
-        if ( !(n % 100) )
-        {
-            NS.displayInfo();
-            NS.print();
-        }
+        NS.setInternalBoundary(Square(d, H/2, A));
+        cout << "Adding square to flow." << endl;
     }
-    NS.step();
-    NS.step();
+    else if (shape == "circle")
+    {
+        NS.setInternalBoundary(Circle(d, H/2, A/2));
+        cout << "Adding circle to flow." << endl;
+    }
+    else
+    {
+        cout << "No shape added to flow." << endl;
+    }
+    
+    // Print initial grid information and initial conditions
+    NS.printGrid("output/");
+    NS.print("output/");
+    
+    cout << "Staring simulation...." << endl;
+    // Simulate until number of steps is reached
+    for (size_t n = 1; n <= nStep; n++)
+    {
+        strouhal(NS, L, H, A, d, NS.step());
+        if (!(n % nDisp))                           NS.displayInfo();
+        if (!(n % nPrint) && n > nPrintStart)       NS.print("output/");
 
+    }
+
+    cout << "Simulation complete." << endl;
+    
     // Multigrid Poisson test with Neumann boundary conditions
     /*MultigridController *MGC;
     MGC = new Fcycle(Nx, Ny);
