@@ -1,12 +1,13 @@
+# project name (generate executable with this name)
 TARGET   = NS
 
 CC       = g++
 # compiling flags here
-CFLAGS   = -std=c++11 -Wall -I.
+CFLAGS   = -std=c++11
 
 LINKER   = g++ -o
 # linking flags here
-LFLAGS   = -Wall -I. -lm
+LFLAGS   = -std=c++11
 
 # change these to set the proper directories where each files shoould be
 SRCDIR   = src
@@ -14,14 +15,15 @@ OBJDIR   = obj
 
 SOURCES  := $(wildcard $(SRCDIR)/*.cpp)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
-OBJECTS  := $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+OBJECTS  := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 rm       = rm -f
+
 
 $(TARGET): $(OBJECTS)
 	@$(LINKER) $@ $(LFLAGS) $(OBJECTS)
 	@echo "Linking complete!"
 
-$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp 
+$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 	@$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
 
