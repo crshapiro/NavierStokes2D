@@ -19,8 +19,6 @@ void strouhal(NavierStokes2D& NS, double L, double H, double A, double d, double
 
 int main(int argc, const char * argv[])
 {
-    // Test change for git
-    
     // parse input arguments
     if (argc < 9)
     {
