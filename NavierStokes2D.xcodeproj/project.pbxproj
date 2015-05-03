@@ -7,7 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C32EDA961AEA7FDB0026492B /* Shape2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C32EDA941AEA7FDB0026492B /* Shape2D.cpp */; };
+		C3739CC31AE32224004FD6A0 /* MultigridController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3739CC11AE32224004FD6A0 /* MultigridController.cpp */; };
+		C3739CC61AE324B3004FD6A0 /* Multigrid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3739CC41AE324B3004FD6A0 /* Multigrid.cpp */; };
 		C385B3F41ADD864100749255 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C385B3F31ADD864100749255 /* main.cpp */; };
+		C385B3FC1ADD87B700749255 /* NavierStokes2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C385B3FA1ADD87B700749255 /* NavierStokes2D.cpp */; };
+		C385B3FF1ADDF43A00749255 /* TridiagonalMatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C385B3FD1ADDF43A00749255 /* TridiagonalMatrix.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +28,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C32EDA941AEA7FDB0026492B /* Shape2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Shape2D.cpp; sourceTree = "<group>"; };
+		C32EDA951AEA7FDB0026492B /* Shape2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Shape2D.h; sourceTree = "<group>"; };
+		C3739CC11AE32224004FD6A0 /* MultigridController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MultigridController.cpp; sourceTree = "<group>"; };
+		C3739CC21AE32224004FD6A0 /* MultigridController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultigridController.h; sourceTree = "<group>"; };
+		C3739CC41AE324B3004FD6A0 /* Multigrid.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Multigrid.cpp; sourceTree = "<group>"; };
+		C3739CC51AE324B3004FD6A0 /* Multigrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Multigrid.h; sourceTree = "<group>"; };
 		C385B3F01ADD864100749255 /* NavierStokes2D */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = NavierStokes2D; sourceTree = BUILT_PRODUCTS_DIR; };
 		C385B3F31ADD864100749255 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		C385B3FA1ADD87B700749255 /* NavierStokes2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NavierStokes2D.cpp; sourceTree = "<group>"; };
+		C385B3FB1ADD87B700749255 /* NavierStokes2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NavierStokes2D.h; sourceTree = "<group>"; };
+		C385B3FD1ADDF43A00749255 /* TridiagonalMatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TridiagonalMatrix.cpp; sourceTree = "<group>"; };
+		C385B3FE1ADDF43A00749255 /* TridiagonalMatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TridiagonalMatrix.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +73,16 @@
 			isa = PBXGroup;
 			children = (
 				C385B3F31ADD864100749255 /* main.cpp */,
+				C3739CC41AE324B3004FD6A0 /* Multigrid.cpp */,
+				C3739CC51AE324B3004FD6A0 /* Multigrid.h */,
+				C3739CC11AE32224004FD6A0 /* MultigridController.cpp */,
+				C3739CC21AE32224004FD6A0 /* MultigridController.h */,
+				C385B3FA1ADD87B700749255 /* NavierStokes2D.cpp */,
+				C385B3FB1ADD87B700749255 /* NavierStokes2D.h */,
+				C32EDA941AEA7FDB0026492B /* Shape2D.cpp */,
+				C32EDA951AEA7FDB0026492B /* Shape2D.h */,
+				C385B3FD1ADDF43A00749255 /* TridiagonalMatrix.cpp */,
+				C385B3FE1ADDF43A00749255 /* TridiagonalMatrix.h */,
 			);
 			path = NavierStokes2D;
 			sourceTree = "<group>";
@@ -118,7 +143,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3739CC61AE324B3004FD6A0 /* Multigrid.cpp in Sources */,
 				C385B3F41ADD864100749255 /* main.cpp in Sources */,
+				C3739CC31AE32224004FD6A0 /* MultigridController.cpp in Sources */,
+				C385B3FC1ADD87B700749255 /* NavierStokes2D.cpp in Sources */,
+				C385B3FF1ADDF43A00749255 /* TridiagonalMatrix.cpp in Sources */,
+				C32EDA961AEA7FDB0026492B /* Shape2D.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -235,6 +265,7 @@
 				C385B3F91ADD864100749255 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
