@@ -73,6 +73,14 @@ private:
     inline double uw(size_t i, size_t j);
     inline double vn(size_t i, size_t j);
     inline double vs(size_t i, size_t j);
+    
+    // Streamlines
+    Multigrid psi;
+    inline double ve(size_t i, size_t j);
+    inline double vw(size_t i, size_t j);
+    inline double un(size_t i, size_t j);
+    inline double us(size_t i, size_t j);
+    
 
     // Domain values
     size_t Nx, Ny;

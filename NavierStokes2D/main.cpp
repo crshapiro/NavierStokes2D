@@ -19,14 +19,10 @@ void strouhal(NavierStokes2D& NS, double L, double H, double A, double d, double
 
 int main(int argc, const char * argv[])
 {
-    // Make output directory if needed
-    system("mkdir output");
-    
-    
     // parse input arguments
-    if (argc < 8)
+    if (argc < 9)
     {
-        cout << "Usage is NavierStokes2D Nx Ny L H Re nStep nDisp nPrint nPrintStart (shape) (d) (A)." << endl;
+        cout << "Usage is NavierStokes2D Nx Ny L H Re nStep nDisp nPrint nPrintStart folder (shape) (d) (A)." << endl;
         cin.get();
         return -1;
     }
@@ -39,21 +35,22 @@ int main(int argc, const char * argv[])
     size_t nDisp = stoi(argv[7]);
     size_t nPrint = stoi(argv[8]);
     size_t nPrintStart = stoi(argv[9]);
+    string folder = argv[10];
 
     string shape("none");
     double d(L/2), A(1);
-    if (argc > 10)
+    if (argc > 11)
     {
-        if (argc < 13)
+        if (argc < 14)
         {
-            cout << "Usage is NavierStokes2D Nx Ny L H Re nStep nDisp nPrint nPrintStart (shape) (d) (A)." << endl;
+            cout << "Usage is NavierStokes2D Nx Ny L H Re nStep nDisp nPrint nPrintStart folder (shape) (d) (A)." << endl;
             cout << "Shape, d, and A must be included together." << endl;
             cin.get();
             return -1;
         }
-        shape = argv[10];
-        d = stod(argv[11]);
-        A = stod(argv[12]);
+        shape = argv[11];
+        d = stod(argv[12]);
+        A = stod(argv[13]);
     }
     
     // Output input arguments
@@ -66,9 +63,14 @@ int main(int argc, const char * argv[])
     cout << "nDisp = " << nDisp << endl;
     cout << "nPrint = " << nPrint << endl;
     cout << "nPrintStart = " << nPrintStart << endl;
+    cout << "folder = " << folder << endl;
     cout << "shape = " << shape << endl;
     cout << "d = " << d << endl;
     cout << "A = " << A << endl;
+
+    // Make output directory if needed
+    string system_call = "mkdir " + folder;
+    system(system_call.c_str());
     
     // Allocate boundary conditions
     vector<double> ul(Ny,0.0), ut(Nx,0.0), ur(Ny,0.0), ub(Nx,0.0);
@@ -103,16 +105,16 @@ int main(int argc, const char * argv[])
     }
     
     // Print initial grid information and initial conditions
-    NS.printGrid("output/");
-    NS.print("output/");
+    NS.printGrid(folder + "/");
+    NS.print(folder + "/");
     
-    cout << "Staring simulation...." << endl;
+    cout << "Starting simulation...." << endl;
     // Simulate until number of steps is reached
     for (size_t n = 1; n <= nStep; n++)
     {
         strouhal(NS, L, H, A, d, NS.step());
         if (!(n % nDisp))                           NS.displayInfo();
-        if (!(n % nPrint) && n > nPrintStart)       NS.print("output/");
+        if (!(n % nPrint) && n >= nPrintStart)       NS.print(folder + "/");
 
     }
 
