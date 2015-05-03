@@ -56,7 +56,7 @@
 		C385B3E71ADD864100749255 = {
 			isa = PBXGroup;
 			children = (
-				C385B3F21ADD864100749255 /* NavierStokes2D */,
+				C385B3F21ADD864100749255 /* src */,
 				C385B3F11ADD864100749255 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -69,7 +69,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C385B3F21ADD864100749255 /* NavierStokes2D */ = {
+		C385B3F21ADD864100749255 /* src */ = {
 			isa = PBXGroup;
 			children = (
 				C385B3F31ADD864100749255 /* main.cpp */,
@@ -84,7 +84,7 @@
 				C385B3FD1ADDF43A00749255 /* TridiagonalMatrix.cpp */,
 				C385B3FE1ADDF43A00749255 /* TridiagonalMatrix.h */,
 			);
-			path = NavierStokes2D;
+			path = src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
