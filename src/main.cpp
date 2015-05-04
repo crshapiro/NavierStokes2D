@@ -7,10 +7,10 @@
 #include "Shape2D.h"
 using namespace std;
 
-void strouhal(NavierStokes2D& NS, double L, double H, double A, double d, double time)
+void strouhal(NavierStokes2D& NS, double L, double H, double A, double d, double time, string folder)
 {
     ofstream f;
-    f.open("output/strouhal.bin", std::ios::out | std::ios::binary | std::ios::app);
+    f.open(folder + "strouhal.bin", std::ios::out | std::ios::binary | std::ios::app);
     f.write(reinterpret_cast<const char*>(&time), sizeof(double));
     double v = NS.get_v(d+A/2+2*A, H/2);
     f.write(reinterpret_cast<const char*>(&v), sizeof(double));
@@ -112,7 +112,7 @@ int main(int argc, const char * argv[])
     // Simulate until number of steps is reached
     for (size_t n = 1; n <= nStep; n++)
     {
-        strouhal(NS, L, H, A, d, NS.step());
+        strouhal(NS, L, H, A, d, NS.step(),folder + "/");
         if (!(n % nDisp))                           NS.displayInfo();
         if (!(n % nPrint) && n >= nPrintStart)      NS.print(folder + "/");
 
