@@ -1,6 +1,6 @@
 #include "NavierStokes2D.h"
 
-NavierStokes2D::NavierStokes2D(vector<double> ul, vector<double> ut, vector<double> ur, vector<double> ub, vector<double> vl, vector<double> vt, vector<double> vr, vector<double> vb, bool leftIsDirichlet, bool topIsDirichlet, bool rightIsDirichlet, bool bottomIsDirichlet, double H, double L, double Re, bool applyOutletBoundary) : MG(L, H, ul, ut, ur, ub, false, false, false, false, new Fcycle(ub.size(), ul.size())), psi(L, H, vector<double>(ul.size(),0.0), vector<double>(ut.size(),0.0), vector<double>(ur.size(),0.0), vector<double>(ub.size(),0.0), false, false, false, false, new Fcycle(ub.size(), ul.size()))
+NavierStokes2D::NavierStokes2D(vector<double> ul, vector<double> ut, vector<double> ur, vector<double> ub, vector<double> vl, vector<double> vt, vector<double> vr, vector<double> vb, bool leftIsDirichlet, bool topIsDirichlet, bool rightIsDirichlet, bool bottomIsDirichlet, double H, double L, double Re, bool applyOutletBoundary) : MG(L, H, ul, ut, ur, ub, false, false, false, false, new Fcycle(ub.size(), ul.size()))
 {
     // Check that sizes are consistent
     if ( ul.size() != ur.size() || vl.size() != vr.size() || ul.size() != vl.size() )
@@ -100,10 +100,6 @@ NavierStokes2D::NavierStokes2D(vector<double> ul, vector<double> ut, vector<doub
     // Loosen convergence for pressure
     MG.tol(1E-6);
     MG.maxIter(Nx*Ny);
-    
-    // Loosen convergence for streamfunction
-    //MG.tol(1E-6);
-    //MG.maxIter(Nx*Ny);
     
     // Set time and step number
     n = 0;
@@ -313,7 +309,6 @@ void NavierStokes2D::setInternalBoundary(const Shape2D& obj)
             if (obj.inVolume(x[i][j], y[i][j]))
                 isSolid[i][j] = 1.0;
     MG.setInternalBoundary(obj);
-    psi.setInternalBoundary(obj);
 }
 
 inline double NavierStokes2D::ustar_e(size_t i, size_t j)
@@ -364,38 +359,6 @@ inline double NavierStokes2D::uw(size_t i, size_t j)
     * (1.0 - isSolid[i-1][j]) * (1.0 - isSolid[i][j]);
 }
 
-inline double NavierStokes2D::ve(size_t i, size_t j)
-{
-    return (0.5*(v[i+1][j] + v[i][j])*(1.0 - atRightBoundary[i][j])
-    + v[i+1][j]*rightIsDirichlet*atRightBoundary[i][j]
-    + (0.5*dx*v[i+1][j] + v[i][j])*(1.0-rightIsDirichlet)*atRightBoundary[i][j])
-    * (1.0 - isSolid[i+1][j]) * (1.0 - isSolid[i][j]);
-}
-
-inline double NavierStokes2D::vw(size_t i, size_t j)
-{
-    return (0.5*(v[i-1][j] + v[i][j])*(1.0 - atLeftBoundary[i][j])
-    + v[i-1][j]*atLeftBoundary[i][j]*leftIsDirichlet
-    + (-0.5*dx*v[i-1][j] + v[i][j])*(1.0-leftIsDirichlet)*atLeftBoundary[i][j])
-    * (1.0 - isSolid[i-1][j]) * (1.0 - isSolid[i][j]);
-}
-
-inline double NavierStokes2D::un(size_t i, size_t j)
-{
-    return (0.5*(u[i][j+1] + u[i][j])*(1.0 - atTopBoundary[i][j])
-    + u[i][j+1]*atTopBoundary[i][j]*topIsDirichlet
-    + (0.5*dy*u[i][j+1] + u[i][j])*(1.0-topIsDirichlet)*atTopBoundary[i][j])
-    * (1.0 - isSolid[i][j+1]) * (1.0 - isSolid[i][j]);
-}
-
-inline double NavierStokes2D::us(size_t i, size_t j)
-{
-    return (0.5*(u[i][j-1] + u[i][j])*(1.0 - atBottomBoundary[i][j])
-            + u[i][j-1]*atBottomBoundary[i][j]*bottomIsDirichlet
-            + (-0.5*dy*u[i][j-1] + v[i][j])*(1.0-bottomIsDirichlet)*atBottomBoundary[i][j])
-            * (1.0 - isSolid[i][j-1]) * (1.0 - isSolid[i][j]);
-}
-
 inline double NavierStokes2D::vn(size_t i, size_t j)
 {
     return (0.5*(v[i][j+1] + v[i][j])*(1.0 - atTopBoundary[i][j])
@@ -414,25 +377,13 @@ inline double NavierStokes2D::vs(size_t i, size_t j)
 
 void NavierStokes2D::print(string fileName)
 {
-    vector<vector<double>> negcurl(Nx+2,vector<double>(Ny+2,0.0));
-    for (size_t i = 1; i <= Nx; i++)
-        for (size_t j = 1; j <= Ny; j++)
-        {
-            negcurl[i][j] = (-(ve(i,j) - vw(i,j))/dx + (un(i,j) - us(i,j))/dy)*(1.0 - isSolid[i][j]);
-        }
-    psi.reset();
-    psi.setRHS(negcurl);
-    //psi.solve();
-    
-    ofstream fu, fv, fp, fpsi;
+    ofstream fu, fv, fp;
     fu.open(fileName + "u_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
     fv.open(fileName + "v_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
     fp.open(fileName + "p_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
-    fpsi.open(fileName + "psi_" + to_string(n) + ".bin", std::ios::out | std::ios::binary);
     fu.write(reinterpret_cast<const char*>(&time), sizeof(double));
     fv.write(reinterpret_cast<const char*>(&time), sizeof(double));
     fp.write(reinterpret_cast<const char*>(&time), sizeof(double));
-    fpsi.write(reinterpret_cast<const char*>(&time), sizeof(double));
     for (size_t j = 0; j <= Ny+1; j++)
     {
         for (size_t i = 0; i <= Nx+1; i++)
@@ -446,15 +397,12 @@ void NavierStokes2D::print(string fileName)
             if (j == 0)             jp = 1;
             if (j == Ny + 1)        jp = Ny;
             double p = MG.elem(ip, jp)/dt;
-            double streamfunc = psi.elem(ip,jp);
             fp.write(reinterpret_cast<const char*>(&p), sizeof(double));
-            fpsi.write(reinterpret_cast<const char*>(&streamfunc), sizeof(double));
         }
     }
     fu.close();
     fv.close();
     fp.close();
-    fpsi.close();
 }
 
 void NavierStokes2D::printGrid(string fileName)
