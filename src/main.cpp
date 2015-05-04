@@ -73,13 +73,23 @@ int main(int argc, const char * argv[])
     system(system_call.c_str());
     
     // Allocate boundary conditions
-    vector<double> ul(Ny,0.0), ut(Nx,0.0), ur(Ny,0.0), ub(Nx,0.0);
-    vector<double> vl(Ny,0.0), vt(Nx,0.0), vr(Ny,0.0), vb(Nx,0.0);
+    vector<double> ul(Ny), ut(Nx), ur(Ny), ub(Nx);
+    vector<double> vl(Ny), vt(Nx), vr(Ny), vb(Nx);
     for (size_t j = 0; j < ul.size(); j++)
     {
         double dy = H/Ny;
         double y = j*dy + dy/2;
         ul[j] = 4*y/(H*H)*(H-y);
+        vl[j] = 0.0;
+        ur[j] = 0.0;
+        vr[j] = 0.0;
+    }
+    for (size_t i = 0; i < ut.size(); i++)
+    {
+        ut[i] = 0.0;
+        ub[i] = 0.0;
+        vt[i] = 0.0;
+        vb[i] = 0.0;
     }
     
     // Types of boundary conditions
