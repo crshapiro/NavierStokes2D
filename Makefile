@@ -3,7 +3,7 @@ TARGET   = NS
 
 CC       = g++
 # compiling flags here
-CFLAGS   = -std=c++11
+CFLAGS   = -std=c++11 -O3
 
 LINKER   = g++ -o
 # linking flags here
