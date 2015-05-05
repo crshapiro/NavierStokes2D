@@ -15,8 +15,8 @@ Multigrid::Multigrid(double Lx, double Ly, vector<double> ul, vector<double> ut,
     Ny = ul.size();
     
     // Check that N is a power of 2
-    if (Nx % 2 != 0 || Ny % 2 != 0)
-        throw invalid_argument("Nx and Ny must be a power of 2");
+    //if (Nx % 2 != 0 || Ny % 2 != 0)
+    //    throw invalid_argument("Nx and Ny must be a power of 2");
     
     // Assign inputs
     nlev = level_number - 1;
